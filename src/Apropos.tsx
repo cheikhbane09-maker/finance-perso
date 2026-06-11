@@ -31,7 +31,7 @@ Il a pour objectif de renforcer nos compétences en développement front-end et 
 
       <h2 className="text-xl font-semibold underline text-violet-900 mb-2">Équipe</h2>
       <ul className="list-disc ml-6">
-        <li>Cheikh Ahmed Tidiane BANE (chef de projet)</li>
+        <li>Cheikh Ahmed Tidiane BANE</li>
         <li>Ndeye Khady SECK</li>
         <li>Maguette THIAW</li>
       </ul>
