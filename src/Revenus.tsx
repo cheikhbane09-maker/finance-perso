@@ -1,4 +1,4 @@
-function Depenses() {
-  return <div>Depenses</div>
+function Revenus() {
+  return <div>Revenus</div>
 }
-export default Depenses;
+export default Revenus
