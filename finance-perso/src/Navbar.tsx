@@ -6,7 +6,7 @@ export default function Navbar() {
       <h1 className="font-bold text-xl">Finance Personelle</h1>
 
       <div className="flex gap-4">
-        <Link to="/" className="hover:underline">
+        <Link to="/dashboard" className="hover:underline">
           Dashboard
         </Link>
 

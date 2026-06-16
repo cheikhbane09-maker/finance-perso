@@ -4,7 +4,7 @@ function LandingPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-zinc-">
+    <div className="min-h-screen bg-white">
 
       {/* NAVBAR */}
       <nav className="flex justify-between items-center px-10 py-5 shadow-sm">
