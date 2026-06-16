@@ -4,21 +4,20 @@ function LandingPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-violet-600">
 
       {/* NAVBAR */}
       <nav className="flex justify-between items-center px-10 py-5 shadow-sm">
-        <h1 className="text-2xl font-black text-violet-600">FinancePerso</h1>
+        <h1 className="text-2xl font-black text-white">FinancePerso</h1>
         <div className="flex gap-3">
           <button
             onClick={() => navigate("/login")}
-            className="border border-violet-600 text-violet-600 font-semibold px-5 py-2 rounded-lg hover:bg-violet-50 transition"
-          >
+            className="bg-violet-600 text-white font-semibold px-5 py-2 rounded-lg hover:bg-white hover:text-violet-600 transition"           >
             Connexion
           </button>
           <button
             onClick={() => navigate("/register")}
-            className="bg-violet-600 text-white font-semibold px-5 py-2 rounded-lg hover:bg-violet-700 transition"
+            className="bg-violet-600 text-white font-semibold px-5 py-2 rounded-lg hover:bg-white hover:text-violet-600 transition"
           >
             S'inscrire
           </button>
