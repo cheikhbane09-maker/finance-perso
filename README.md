@@ -1,73 +1,57 @@
-# React + TypeScript + Vite
+# Finance Perso — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Application web de gestion de finances personnelles : suivi des revenus, des dépenses, de l'épargne (comptes bloqués) et statistiques.
 
-Currently, two official plugins are available:
+## Fonctionnalités
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Ajouter des revenus (salaire, argent de poche...)
+- Ajouter des dépenses (nourriture, transport...)
+- Épargne : bloquer un montant jusqu'à une date de déblocage (retrait impossible avant)
+- Statistiques : camembert revenus/dépenses + évolution mensuelle en barres
+- Voir son solde en temps réel
+- Supprimer des transactions
 
-## React Compiler
+## Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+React + TypeScript + Tailwind CSS + React Router.
 
-## Expanding the ESLint configuration
+## Lancer le projet
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Structure
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src/
+  App.tsx               # Routes de l'application
+  AppContext.tsx         # Contexte global (revenus, dépenses, épargne)
+  Navbar.tsx / Footer.tsx
+  Dashboard.tsx          # Vue d'ensemble + solde
+  Revenus.tsx / Depenses.tsx
+  Epargne.tsx            # Comptes bloqués
+  Stats.tsx              # Graphiques (camembert + barres, en SVG natif)
+  Apropos.tsx
+```
+
+## Backend
+
+Le backend (NestJS + TypeORM + JWT/RBAC) se trouve dans le dossier [`backend/`](./backend) à la racine du dépôt. Il possède son propre `README.md`, son propre `package.json` et son propre historique Git (voir `backend/README.md` pour le détail).
+
+## Répartition du travail (frontend)
+
+| Membre | Tâches |
+|---|---|
+| Cheikh Ahmed Tidiane BANE (chef) | Dashboard, page Statistiques, contexte global (données), navigation, déploiement |
+| Maguette THIAW | Pages Revenus, Dépenses, Épargne |
+| Ndeye Khady SECK | Navbar, Footer, page À propos |
+
+## Git flow
+
+- `main` : version stable
+- `dev` : intégration des fonctionnalités
+- `feature/*` : une branche par fonctionnalité/membre (ex: `feature/epargne-maguette`, `feature/statistiques-cheikh`, `feature/navigation-cheikh`, `feature/apropos-ndeyekhady`)
+
+Chaque fonctionnalité est développée sur sa branche `feature/*`, puis fusionnée dans `dev`, puis dans `main` une fois validée.
