@@ -9,6 +9,8 @@ import ResetPassword from "./ResetPassword";
 import Dashboard from "./Dashboard";
 import Revenus from "./Revenus";
 import Depenses from "./Depenses";
+import Epargne from "./Epargne";
+import Stats from "./Stats";
 import Apropos from "./Apropos";
 
 function App() {
@@ -23,6 +25,8 @@ function App() {
           <Route path="/dashboard" element={<><Navbar /><Dashboard /><Footer /></>} />
           <Route path="/revenus" element={<><Navbar /><Revenus /><Footer /></>} />
           <Route path="/depenses" element={<><Navbar /><Depenses /><Footer /></>} />
+          <Route path="/epargne" element={<><Navbar /><Epargne /><Footer /></>} />
+          <Route path="/stats" element={<><Navbar /><Stats /><Footer /></>} />
           <Route path="/apropos" element={<><Navbar /><Apropos /><Footer /></>} />
         </Routes>
       </BrowserRouter>

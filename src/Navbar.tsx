@@ -18,6 +18,14 @@ export default function Navbar() {
           Dépenses
         </Link>
 
+        <Link to="/epargne" className="hover:underline">
+          Épargne
+        </Link>
+
+        <Link to="/stats" className="hover:underline">
+          Statistiques
+        </Link>
+
         <Link to="/apropos" className="hover:underline">
           À propos
         </Link>
