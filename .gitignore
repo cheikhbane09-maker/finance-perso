@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Le backend est un projet/depot Git separe (voir backend/README.md)
+backend/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
