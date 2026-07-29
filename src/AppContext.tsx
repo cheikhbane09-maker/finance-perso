@@ -1,114 +1,125 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import {
+  estConnecte,
+  listerTransactions,
+  creerTransaction,
+  supprimerTransactionAPI,
+  listerEpargnes,
+  creerEpargne,
+  supprimerEpargneAPI,
+} from "./api";
 
 export type Transaction = {
   id: number;
   nom: string;
   montant: number;
-  date: string; // ISO string, ex: 2026-07-22
+  date: string; // ISO string
 };
 
 export type Epargne = {
   id: number;
   nom: string;
   montant: number;
-  dateCreation: string; // ISO string
-  dateDeblocage: string; // ISO string - date à partir de laquelle le retrait est possible
+  dateCreation: string;
+  dateDeblocage: string;
 };
 
 type ContextType = {
   revenus: Transaction[];
   depenses: Transaction[];
   epargnes: Epargne[];
-  ajouterRevenu: (nom: string, montant: number) => void;
-  ajouterDepense: (nom: string, montant: number) => void;
-  supprimerRevenu: (id: number) => void;
-  supprimerDepense: (id: number) => void;
-  ajouterEpargne: (nom: string, montant: number, dateDeblocage: string) => void;
-  retirerEpargne: (id: number) => { ok: boolean; message: string };
+  chargement: boolean;
+  ajouterRevenu: (nom: string, montant: number) => Promise<void>;
+  ajouterDepense: (nom: string, montant: number) => Promise<void>;
+  supprimerRevenu: (id: number) => Promise<void>;
+  supprimerDepense: (id: number) => Promise<void>;
+  ajouterEpargne: (nom: string, montant: number, dateDeblocage: string) => Promise<void>;
+  retirerEpargne: (id: number) => Promise<{ ok: boolean; message: string }>;
   estDebloquee: (epargne: Epargne) => boolean;
 };
 
 const AppContext = createContext<ContextType | null>(null);
 
-function chargerDepuisStorage<T>(cle: string, valeurParDefaut: T): T {
-  try {
-    const saved = localStorage.getItem(cle);
-    return saved ? (JSON.parse(saved) as T) : valeurParDefaut;
-  } catch {
-    return valeurParDefaut;
-  }
-}
-
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [revenus, setRevenus] = useState<Transaction[]>(() =>
-    chargerDepuisStorage("app_revenus", [])
-  );
-  const [depenses, setDepenses] = useState<Transaction[]>(() =>
-    chargerDepuisStorage("app_depenses", [])
-  );
-  const [epargnes, setEpargnes] = useState<Epargne[]>(() =>
-    chargerDepuisStorage("app_epargnes", [])
-  );
+  const [revenus, setRevenus] = useState<Transaction[]>([]);
+  const [depenses, setDepenses] = useState<Transaction[]>([]);
+  const [epargnes, setEpargnes] = useState<Epargne[]>([]);
+  const [chargement, setChargement] = useState(true);
 
+  // Au montage (si connecté), on récupère les données depuis le backend NestJS
+  // au lieu du localStorage — le backend est maintenant la source de vérité.
   useEffect(() => {
-    localStorage.setItem("app_revenus", JSON.stringify(revenus));
-  }, [revenus]);
+    if (!estConnecte()) {
+      setChargement(false);
+      return;
+    }
 
-  useEffect(() => {
-    localStorage.setItem("app_depenses", JSON.stringify(depenses));
-  }, [depenses]);
+    Promise.all([listerTransactions(), listerEpargnes()])
+      .then(([transactions, ep]) => {
+        setRevenus(
+          transactions
+            .filter((t) => t.type === "revenu")
+            .map((t) => ({ id: t.id, nom: t.nom, montant: t.montant, date: t.date }))
+        );
+        setDepenses(
+          transactions
+            .filter((t) => t.type === "depense")
+            .map((t) => ({ id: t.id, nom: t.nom, montant: t.montant, date: t.date }))
+        );
+        setEpargnes(
+          ep.map((e) => ({
+            id: e.id,
+            nom: e.nom,
+            montant: e.montant,
+            dateCreation: e.dateCreation,
+            dateDeblocage: e.dateDeblocage,
+          }))
+        );
+      })
+      .catch((err) => console.error("Erreur de chargement des données :", err))
+      .finally(() => setChargement(false));
+  }, []);
 
-  useEffect(() => {
-    localStorage.setItem("app_epargnes", JSON.stringify(epargnes));
-  }, [epargnes]);
-
-  const ajouterRevenu = (nom: string, montant: number) => {
-    setRevenus([...revenus, { id: Date.now(), nom, montant, date: new Date().toISOString() }]);
+  const ajouterRevenu = async (nom: string, montant: number) => {
+    const t = await creerTransaction("revenu", nom, montant);
+    setRevenus((prev) => [...prev, { id: t.id, nom: t.nom, montant: t.montant, date: t.date }]);
   };
 
-  const ajouterDepense = (nom: string, montant: number) => {
-    setDepenses([...depenses, { id: Date.now(), nom, montant, date: new Date().toISOString() }]);
+  const ajouterDepense = async (nom: string, montant: number) => {
+    const t = await creerTransaction("depense", nom, montant);
+    setDepenses((prev) => [...prev, { id: t.id, nom: t.nom, montant: t.montant, date: t.date }]);
   };
 
-  const supprimerRevenu = (id: number) => {
-    setRevenus(revenus.filter((r) => r.id !== id));
+  const supprimerRevenu = async (id: number) => {
+    await supprimerTransactionAPI(id);
+    setRevenus((prev) => prev.filter((r) => r.id !== id));
   };
 
-  const supprimerDepense = (id: number) => {
-    setDepenses(depenses.filter((d) => d.id !== id));
+  const supprimerDepense = async (id: number) => {
+    await supprimerTransactionAPI(id);
+    setDepenses((prev) => prev.filter((d) => d.id !== id));
   };
 
   const estDebloquee = (epargne: Epargne) => {
     return new Date(epargne.dateDeblocage).getTime() <= Date.now();
   };
 
-  const ajouterEpargne = (nom: string, montant: number, dateDeblocage: string) => {
-    setEpargnes([
-      ...epargnes,
-      {
-        id: Date.now(),
-        nom,
-        montant,
-        dateCreation: new Date().toISOString(),
-        dateDeblocage,
-      },
+  const ajouterEpargne = async (nom: string, montant: number, dateDeblocage: string) => {
+    const e = await creerEpargne(nom, montant, dateDeblocage);
+    setEpargnes((prev) => [
+      ...prev,
+      { id: e.id, nom: e.nom, montant: e.montant, dateCreation: e.dateCreation, dateDeblocage: e.dateDeblocage },
     ]);
   };
 
-  const retirerEpargne = (id: number) => {
-    const epargne = epargnes.find((e) => e.id === id);
-    if (!epargne) return { ok: false, message: "Compte introuvable." };
-
-    if (!estDebloquee(epargne)) {
-      const dateFr = new Date(epargne.dateDeblocage).toLocaleDateString("fr-FR");
-      return {
-        ok: false,
-        message: `Ce compte est bloqué jusqu'au ${dateFr}. Retrait impossible avant cette date.`,
-      };
+  const retirerEpargne = async (id: number) => {
+    try {
+      const resultat = await supprimerEpargneAPI(id);
+      setEpargnes((prev) => prev.filter((e) => e.id !== id));
+      return { ok: true, message: resultat.message };
+    } catch (err) {
+      return { ok: false, message: (err as Error).message };
     }
-
-    setEpargnes(epargnes.filter((e) => e.id !== id));
-    return { ok: true, message: "Retrait effectué avec succès." };
   };
 
   return (
@@ -117,6 +128,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         revenus,
         depenses,
         epargnes,
+        chargement,
         ajouterRevenu,
         ajouterDepense,
         supprimerRevenu,

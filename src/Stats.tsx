@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+import { BarChart3 } from "./Icons";
 import { useApp } from "./AppContext";
 import type { Transaction } from "./AppContext";
 
@@ -22,7 +24,7 @@ function PieChart({ revenus, depenses }: { revenus: number; depenses: number }) 
             cy="90"
             r={rayon}
             fill="transparent"
-            stroke="#e5e7eb"
+            stroke="#1f2937"
             strokeWidth="28"
           />
           {total > 0 && (
@@ -32,7 +34,7 @@ function PieChart({ revenus, depenses }: { revenus: number; depenses: number }) 
                 cy="90"
                 r={rayon}
                 fill="transparent"
-                stroke="#22c55e"
+                stroke="#34d399"
                 strokeWidth="28"
                 strokeDasharray={`${segmentRevenus} ${circonference - segmentRevenus}`}
                 strokeDashoffset="0"
@@ -42,7 +44,7 @@ function PieChart({ revenus, depenses }: { revenus: number; depenses: number }) 
                 cy="90"
                 r={rayon}
                 fill="transparent"
-                stroke="#ef4444"
+                stroke="#0d9488"
                 strokeWidth="28"
                 strokeDasharray={`${segmentDepenses} ${circonference - segmentDepenses}`}
                 strokeDashoffset={-segmentRevenus}
@@ -50,19 +52,19 @@ function PieChart({ revenus, depenses }: { revenus: number; depenses: number }) 
             </>
           )}
         </g>
-        <text x="90" y="85" textAnchor="middle" className="fill-gray-700" fontSize="14" fontWeight="bold">
+        <text x="90" y="85" textAnchor="middle" fill="#d1fae5" fontSize="14" fontWeight="bold">
           {total > 0 ? `${Math.round(partRevenus * 100)}% / ${Math.round(partDepenses * 100)}%` : "Aucune donnée"}
         </text>
-        <text x="90" y="103" textAnchor="middle" className="fill-gray-400" fontSize="11">
+        <text x="90" y="103" textAnchor="middle" fill="#6ee7b7" opacity="0.5" fontSize="11">
           Revenus / Dépenses
         </text>
       </svg>
       <div className="flex gap-6 mt-3 text-sm">
-        <span className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-green-500 inline-block"></span> Revenus
+        <span className="flex items-center gap-2 text-emerald-100/70">
+          <span className="w-3 h-3 rounded-full bg-emerald-400 inline-block"></span> Revenus
         </span>
-        <span className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-red-500 inline-block"></span> Dépenses
+        <span className="flex items-center gap-2 text-emerald-100/70">
+          <span className="w-3 h-3 rounded-full bg-teal-600 inline-block"></span> Dépenses
         </span>
       </div>
     </div>
@@ -103,38 +105,38 @@ function grouperParMois(revenus: Transaction[], depenses: Transaction[]): MoisDa
 // --- Petit graphique en barres, sans librairie externe ---
 function BarChart({ data }: { data: MoisData[] }) {
   if (data.length === 0) {
-    return <p className="text-gray-400 text-center py-10">Pas encore assez de données pour afficher l'évolution.</p>;
+    return <p className="text-emerald-100/30 text-center py-10">Pas encore assez de données pour afficher l'évolution.</p>;
   }
 
   const max = Math.max(...data.map((d) => Math.max(d.revenus, d.depenses)), 1);
 
   return (
     <div>
-      <div className="flex items-end justify-around gap-4 h-56 border-b border-gray-200 pb-2">
+      <div className="flex items-end justify-around gap-4 h-56 border-b border-emerald-500/20 pb-2">
         {data.map((d) => (
           <div key={d.mois} className="flex flex-col items-center gap-1 flex-1">
             <div className="flex items-end gap-1 h-48">
               <div
-                className="w-5 bg-green-500 rounded-t-md transition-all"
+                className="w-5 bg-gradient-to-t from-emerald-600 to-emerald-400 rounded-t-md transition-all shadow-lg shadow-emerald-500/40"
                 style={{ height: `${(d.revenus / max) * 100}%` }}
                 title={`Revenus: ${d.revenus} FCFA`}
               ></div>
               <div
-                className="w-5 bg-red-500 rounded-t-md transition-all"
+                className="w-5 bg-gradient-to-t from-teal-800 to-teal-500 rounded-t-md transition-all shadow-lg shadow-teal-500/40"
                 style={{ height: `${(d.depenses / max) * 100}%` }}
                 title={`Dépenses: ${d.depenses} FCFA`}
               ></div>
             </div>
-            <span className="text-xs text-gray-500 capitalize">{d.mois}</span>
+            <span className="text-xs text-emerald-100/50 capitalize">{d.mois}</span>
           </div>
         ))}
       </div>
       <div className="flex gap-6 mt-3 text-sm justify-center">
-        <span className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-green-500 inline-block"></span> Revenus
+        <span className="flex items-center gap-2 text-emerald-100/70">
+          <span className="w-3 h-3 rounded-full bg-emerald-400 inline-block"></span> Revenus
         </span>
-        <span className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-red-500 inline-block"></span> Dépenses
+        <span className="flex items-center gap-2 text-emerald-100/70">
+          <span className="w-3 h-3 rounded-full bg-teal-600 inline-block"></span> Dépenses
         </span>
       </div>
     </div>
@@ -153,37 +155,42 @@ function Stats() {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
-      <h1 className="text-3xl font-bold mb-2">Statistiques</h1>
-      <p className="text-gray-500 mb-8">Une vue d'ensemble de vos finances.</p>
+      <div className="flex items-center gap-3 mb-2">
+        <span className="bg-gradient-to-br from-emerald-400 to-green-600 text-black p-2.5 rounded-xl shadow-lg shadow-emerald-500/40">
+          <BarChart3 size={22} />
+        </span>
+        <h1 className="text-3xl font-black bg-gradient-to-r from-emerald-300 via-green-300 to-teal-300 bg-clip-text text-transparent">Statistiques</h1>
+      </div>
+      <p className="text-emerald-100/40 mb-8 ml-1">Une vue d'ensemble de vos finances.</p>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-        <div className="bg-blue-100 rounded-xl p-4 text-center">
-          <p className="text-gray-500 text-xs mb-1">Solde</p>
-          <p className="text-xl font-bold text-blue-600">{solde.toLocaleString()} FCFA</p>
+        <div className="bg-gradient-to-br from-emerald-500 to-green-700 rounded-xl p-4 text-center shadow-lg shadow-emerald-500/40">
+          <p className="text-white/80 text-xs mb-1">Solde</p>
+          <p className="text-xl font-bold text-white">{solde.toLocaleString()} FCFA</p>
         </div>
-        <div className="bg-green-100 rounded-xl p-4 text-center">
-          <p className="text-gray-500 text-xs mb-1">Revenus</p>
-          <p className="text-xl font-bold text-green-600">{totalRevenus.toLocaleString()} FCFA</p>
+        <div className="bg-gradient-to-br from-green-400 to-emerald-600 rounded-xl p-4 text-center shadow-lg shadow-green-500/40">
+          <p className="text-white/80 text-xs mb-1">Revenus</p>
+          <p className="text-xl font-bold text-white">{totalRevenus.toLocaleString()} FCFA</p>
         </div>
-        <div className="bg-red-100 rounded-xl p-4 text-center">
-          <p className="text-gray-500 text-xs mb-1">Dépenses</p>
-          <p className="text-xl font-bold text-red-600">{totalDepenses.toLocaleString()} FCFA</p>
+        <div className="bg-gradient-to-br from-teal-500 to-emerald-800 rounded-xl p-4 text-center shadow-lg shadow-teal-500/40">
+          <p className="text-white/80 text-xs mb-1">Dépenses</p>
+          <p className="text-xl font-bold text-white">{totalDepenses.toLocaleString()} FCFA</p>
         </div>
-        <div className="bg-indigo-100 rounded-xl p-4 text-center">
-          <p className="text-gray-500 text-xs mb-1">Épargne</p>
-          <p className="text-xl font-bold text-indigo-600">{totalEpargnes.toLocaleString()} FCFA</p>
+        <div className="bg-gradient-to-br from-lime-400 to-green-700 rounded-xl p-4 text-center shadow-lg shadow-lime-500/40">
+          <p className="text-white/80 text-xs mb-1">Épargne</p>
+          <p className="text-xl font-bold text-white">{totalEpargnes.toLocaleString()} FCFA</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bg-white rounded-xl shadow p-6">
-          <h2 className="text-lg font-semibold mb-4 text-center">Répartition revenus / dépenses</h2>
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="bg-white/5 backdrop-blur-md border border-emerald-500/15 rounded-2xl shadow-lg p-6">
+          <h2 className="text-lg font-semibold mb-4 text-center text-white">Répartition revenus / dépenses</h2>
           <PieChart revenus={totalRevenus} depenses={totalDepenses} />
-        </div>
-        <div className="bg-white rounded-xl shadow p-6">
-          <h2 className="text-lg font-semibold mb-4 text-center">Évolution mensuelle</h2>
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white/5 backdrop-blur-md border border-emerald-500/15 rounded-2xl shadow-lg p-6">
+          <h2 className="text-lg font-semibold mb-4 text-center text-white">Évolution mensuelle</h2>
           <BarChart data={dataMensuelle} />
-        </div>
+        </motion.div>
       </div>
     </div>
   );
