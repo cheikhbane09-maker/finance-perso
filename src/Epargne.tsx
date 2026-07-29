@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { PiggyBank, Lock, LockOpen } from "./Icons";
 import { useApp } from "./AppContext";
 
 function Epargne() {
@@ -10,16 +12,21 @@ function Epargne() {
 
   const dateMin = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
-  const handleAjouter = () => {
+  const handleAjouter = async () => {
     if (!nom || !montant || !dateDeblocage) return;
-    ajouterEpargne(nom, Number(montant), new Date(dateDeblocage).toISOString());
-    setNom("");
-    setMontant("");
-    setDateDeblocage("");
+    try {
+      await ajouterEpargne(nom, Number(montant), new Date(dateDeblocage).toISOString());
+      setNom("");
+      setMontant("");
+      setDateDeblocage("");
+    } catch (err) {
+      setMessage({ ok: false, texte: (err as Error).message });
+      setTimeout(() => setMessage(null), 4000);
+    }
   };
 
-  const handleRetrait = (id: number) => {
-    const resultat = retirerEpargne(id);
+  const handleRetrait = async (id: number) => {
+    const resultat = await retirerEpargne(id);
     setMessage({ ok: resultat.ok, texte: resultat.message });
     setTimeout(() => setMessage(null), 4000);
   };
@@ -28,96 +35,118 @@ function Epargne() {
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-10">
-      <h1 className="text-3xl font-bold mb-2">Épargne (comptes bloqués)</h1>
-      <p className="text-gray-500 mb-8">
+      <div className="flex items-center gap-3 mb-2">
+        <span className="bg-gradient-to-br from-lime-400 to-green-700 text-black p-2.5 rounded-xl shadow-lg shadow-lime-500/40">
+          <PiggyBank size={22} />
+        </span>
+        <h1 className="text-3xl font-black bg-gradient-to-r from-lime-300 to-green-400 bg-clip-text text-transparent">Épargne</h1>
+      </div>
+      <p className="text-emerald-100/40 mb-8 ml-1">
         Mettez de l'argent de côté sur un compte bloqué jusqu'à une date de déblocage. Impossible de retirer avant cette date.
       </p>
 
-      <div className="bg-blue-100 rounded-xl p-5 text-center mb-8">
-        <p className="text-gray-500 text-sm mb-1">Total épargné</p>
-        <p className="text-2xl font-bold text-blue-600">{totalEpargne.toLocaleString()} FCFA</p>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-gradient-to-br from-green-600 to-lime-700 rounded-2xl p-6 text-center mb-8 shadow-lg shadow-lime-500/30"
+      >
+        <p className="text-white/70 text-sm mb-1">Total épargné</p>
+        <p className="text-3xl font-black text-white">{totalEpargne.toLocaleString()} FCFA</p>
+      </motion.div>
 
-      {message && (
-        <div
-          className={`mb-6 rounded-lg px-4 py-3 text-sm font-medium ${
-            message.ok ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-          }`}
-        >
-          {message.texte}
-        </div>
-      )}
+      <AnimatePresence>
+        {message && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className={`mb-6 rounded-xl px-4 py-3 text-sm font-medium border ${
+              message.ok ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30" : "bg-red-500/10 text-red-300 border-red-500/30"
+            }`}
+          >
+            {message.texte}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Formulaire */}
-      <div className="bg-blue-50 rounded-xl p-6 mb-8">
-        <h2 className="text-lg font-semibold mb-4">Créer un compte bloqué</h2>
+      <div className="bg-white/5 backdrop-blur-md rounded-2xl p-6 mb-8 border border-emerald-500/15">
+        <h2 className="text-lg font-semibold mb-4 text-white">Créer un compte bloqué</h2>
         <div className="flex flex-col gap-3">
           <input
             type="text"
             placeholder="Nom de l'épargne (ex: Voyage, Urgence...)"
             value={nom}
             onChange={(e) => setNom(e.target.value)}
-            className="border border-gray-300 rounded-lg px-4 py-2 outline-none focus:border-blue-400"
+            className="border border-emerald-500/20 bg-black/40 text-white placeholder-emerald-100/20 rounded-xl px-4 py-2.5 outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-500/20 transition text-sm"
           />
           <input
             type="number"
             placeholder="Montant (FCFA)"
             value={montant}
             onChange={(e) => setMontant(e.target.value)}
-            className="border border-gray-300 rounded-lg px-4 py-2 outline-none focus:border-blue-400"
+            className="border border-emerald-500/20 bg-black/40 text-white placeholder-emerald-100/20 rounded-xl px-4 py-2.5 outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-500/20 transition text-sm"
           />
           <div>
-            <label className="block text-sm text-gray-500 mb-1">Date de déblocage</label>
+            <label className="block text-sm text-emerald-100/40 mb-1">Date de déblocage</label>
             <input
               type="date"
               min={dateMin}
               value={dateDeblocage}
               onChange={(e) => setDateDeblocage(e.target.value)}
-              className="border border-gray-300 rounded-lg px-4 py-2 outline-none focus:border-blue-400 w-full"
+              className="border border-emerald-500/20 bg-black/40 text-white rounded-xl px-4 py-2.5 outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-500/20 transition w-full text-sm"
             />
           </div>
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleAjouter}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded-lg transition-colors"
+            className="bg-gradient-to-r from-lime-500 to-green-700 text-black font-bold py-2.5 rounded-xl shadow-lg shadow-lime-500/40"
           >
             Bloquer ce montant
-          </button>
+          </motion.button>
         </div>
       </div>
 
       {/* Liste */}
-      <h2 className="text-lg font-semibold mb-4">Mes comptes bloqués</h2>
+      <h2 className="text-lg font-semibold mb-4 text-white">Mes comptes bloqués</h2>
       {epargnes.length === 0 ? (
-        <p className="text-gray-400">Aucune épargne créée</p>
+        <p className="text-emerald-100/30">Aucune épargne créée</p>
       ) : (
         epargnes.map((e) => {
           const debloquee = estDebloquee(e);
           return (
-            <div key={e.id} className="flex justify-between items-center bg-gray-50 rounded-lg px-4 py-3 mb-2">
+            <motion.div
+              key={e.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex justify-between items-center bg-white/5 hover:bg-white/10 border border-emerald-500/10 rounded-xl px-4 py-3 mb-2 transition-colors"
+            >
               <div>
-                <span className="font-medium block">{e.nom}</span>
+                <span className="font-medium block text-emerald-50/80">{e.nom}</span>
                 <span
-                  className={`text-xs px-2 py-0.5 rounded-full ${
-                    debloquee ? "bg-green-100 text-green-600" : "bg-orange-100 text-orange-600"
+                  className={`text-xs px-2 py-0.5 rounded-full inline-flex items-center gap-1 border ${
+                    debloquee ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30" : "bg-amber-500/10 text-amber-300 border-amber-500/30"
                   }`}
                 >
+                  {debloquee ? <LockOpen size={11} /> : <Lock size={11} />}
                   {debloquee
                     ? "Débloqué"
                     : `Bloqué jusqu'au ${new Date(e.dateDeblocage).toLocaleDateString("fr-FR")}`}
                 </span>
               </div>
               <div className="flex items-center gap-4">
-                <span className="text-blue-500 font-bold">{e.montant.toLocaleString()} FCFA</span>
+                <span className="text-lime-400 font-bold">{e.montant.toLocaleString()} FCFA</span>
                 <button
                   onClick={() => handleRetrait(e.id)}
                   className={`text-sm transition-colors ${
-                    debloquee ? "text-gray-500 hover:text-red-500" : "text-gray-300 cursor-not-allowed"
+                    debloquee ? "text-emerald-100/50 hover:text-red-400" : "text-emerald-100/15 cursor-not-allowed"
                   }`}
                 >
                   Retirer
                 </button>
               </div>
-            </div>
+            </motion.div>
           );
         })
       )}

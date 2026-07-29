@@ -1,68 +1,96 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { TrendingDown, X, Plus } from "./Icons";
 import { useApp } from "./AppContext";
 
 function Depenses() {
   const { depenses, ajouterDepense, supprimerDepense } = useApp();
   const [nom, setNom] = useState("");
   const [montant, setMontant] = useState("");
+  const [erreur, setErreur] = useState("");
 
-  const handleAjouter = () => {
+  const handleAjouter = async () => {
     if (!nom || !montant) return;
-    ajouterDepense(nom, Number(montant));
-    setNom("");
-    setMontant("");
+    try {
+      await ajouterDepense(nom, Number(montant));
+      setNom("");
+      setMontant("");
+      setErreur("");
+    } catch (err) {
+      setErreur((err as Error).message);
+    }
   };
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-10">
-      <h1 className="text-3xl font-bold mb-8">Dépenses</h1>
+      <div className="flex items-center gap-3 mb-8">
+        <span className="bg-gradient-to-br from-teal-400 to-emerald-700 text-black p-2.5 rounded-xl shadow-lg shadow-teal-500/40">
+          <TrendingDown size={22} />
+        </span>
+        <h1 className="text-3xl font-black bg-gradient-to-r from-teal-300 to-emerald-400 bg-clip-text text-transparent">Dépenses</h1>
+      </div>
 
       {/* Formulaire */}
-      <div className="bg-red-50 rounded-xl p-6 mb-8">
-        <h2 className="text-lg font-semibold mb-4">Ajouter une dépense</h2>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white/5 backdrop-blur-md rounded-2xl p-6 mb-8 border border-emerald-500/15"
+      >
+        <h2 className="text-lg font-semibold mb-4 text-white">Ajouter une dépense</h2>
+        {erreur && <p className="text-red-400 text-sm mb-3">{erreur}</p>}
         <div className="flex flex-col gap-3">
           <input
             type="text"
             placeholder="Nom de la dépense"
             value={nom}
             onChange={(e) => setNom(e.target.value)}
-            className="border border-gray-300 rounded-lg px-4 py-2 outline-none focus:border-red-400"
+            className="border border-emerald-500/20 bg-black/40 text-white placeholder-emerald-100/20 rounded-xl px-4 py-2.5 outline-none focus:border-teal-400 focus:ring-4 focus:ring-teal-500/20 transition text-sm"
           />
           <input
             type="number"
             placeholder="Montant (FCFA)"
             value={montant}
             onChange={(e) => setMontant(e.target.value)}
-            className="border border-gray-300 rounded-lg px-4 py-2 outline-none focus:border-red-400"
+            className="border border-emerald-500/20 bg-black/40 text-white placeholder-emerald-100/20 rounded-xl px-4 py-2.5 outline-none focus:border-teal-400 focus:ring-4 focus:ring-teal-500/20 transition text-sm"
           />
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleAjouter}
-            className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 rounded-lg transition-colors"
+            className="bg-gradient-to-r from-teal-500 to-emerald-700 text-black font-bold py-2.5 rounded-xl shadow-lg shadow-teal-500/40 flex items-center justify-center gap-2"
           >
-            Ajouter
-          </button>
+            <Plus size={18} /> Ajouter
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Liste */}
-      <h2 className="text-lg font-semibold mb-4">Mes dépenses</h2>
+      <h2 className="text-lg font-semibold mb-4 text-white">Mes dépenses</h2>
       {depenses.length === 0 ? (
-        <p className="text-gray-400">Aucune dépense ajoutée</p>
+        <p className="text-emerald-100/30">Aucune dépense ajoutée</p>
       ) : (
-        depenses.map((d) => (
-          <div key={d.id} className="flex justify-between items-center bg-gray-50 rounded-lg px-4 py-3 mb-2">
-            <span className="font-medium">{d.nom}</span>
-            <div className="flex items-center gap-4">
-              <span className="text-red-500 font-bold">-{d.montant} FCFA</span>
-              <button
-                onClick={() => supprimerDepense(d.id)}
-                className="text-gray-400 hover:text-red-500 transition-colors text-sm"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-        ))
+        <AnimatePresence>
+          {depenses.map((d) => (
+            <motion.div
+              key={d.id}
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 12 }}
+              className="flex justify-between items-center bg-white/5 hover:bg-white/10 border border-emerald-500/10 rounded-xl px-4 py-3 mb-2 transition-colors"
+            >
+              <span className="font-medium text-emerald-50/80">{d.nom}</span>
+              <div className="flex items-center gap-4">
+                <span className="text-teal-400 font-bold">-{d.montant.toLocaleString()} FCFA</span>
+                <button
+                  onClick={() => supprimerDepense(d.id)}
+                  className="text-emerald-100/30 hover:text-red-400 transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
       )}
     </div>
   );
