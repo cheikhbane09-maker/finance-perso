@@ -16,7 +16,7 @@ import Stats from "./Stats";
 function App() {
   return (
     <AppProvider>
-      <BrowserRouter basename="/finance-perso">
+      <BrowserRouter>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
